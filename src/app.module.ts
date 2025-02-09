@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
+import * as redisStore from 'cache-manager-redis-store';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 import { User } from './users/user.entity';
 import { Product } from './products/product.entity';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -22,8 +25,15 @@ import { Product } from './products/product.entity';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    CacheModule.register({
+      store: redisStore,
+      host: process.env.HOST,
+      port: process.env.PORT,
+      ttl: 60,
+    }),
     AuthModule,
     ProductsModule,
+    OrdersModule,
   ],
 })
 export class AppModule {}
