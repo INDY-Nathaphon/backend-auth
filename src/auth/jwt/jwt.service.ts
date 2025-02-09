@@ -8,12 +8,20 @@ export class JwtAuthService {
   constructor(private jwtService: JwtService) {}
 
   generateAccessToken(user: User): string {
-    const payload = { userId: user.id, username: user.username };
+    const payload = {
+      userId: user.id,
+      username: user.username,
+      role: user.role,
+    };
     return this.jwtService.sign(payload, { expiresIn: '15m' });
   }
 
   generateRefreshToken(user: User): string {
-    const payload = { userId: user.id, username: user.username };
+    const payload = {
+      userId: user.id,
+      username: user.username,
+      role: user.role,
+    };
     return this.jwtService.sign(payload, { expiresIn: '7d' });
   }
 

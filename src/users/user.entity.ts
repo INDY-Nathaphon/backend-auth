@@ -1,5 +1,10 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
+export enum UserRole {
+  CUSTOMER = 'customer',
+  ADMIN = 'admin',
+}
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -16,4 +21,7 @@ export class User {
 
   @Column({ nullable: true })
   refreshToken: string; // เก็บ Refresh Token สำหรับการทำระบบ logout
+
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.CUSTOMER }) // default to customer
+  role: UserRole;
 }

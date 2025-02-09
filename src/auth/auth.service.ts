@@ -9,11 +9,13 @@ import { LoginDto } from 'src/dto/login.dto';
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService, // Inject UsersService
+    private usersService: UsersService,
     private jwtAuthService: JwtAuthService,
   ) {}
 
-  async register(registerDto: RegisterDto): Promise<any> {
+  async register(
+    registerDto: RegisterDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const { username, email, password } = registerDto;
     const existingUser = await this.usersService.findByUsername(username);
     if (existingUser) {
@@ -26,13 +28,15 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    const accessToken = this.jwtAuthService.generateAccessToken(user);
-    const refreshToken = this.jwtAuthService.generateRefreshToken(user);
+    const accessToken = this.jwtAuthService.generateAccessToken(user); // ควรใช้ await หากฟังก์ชันนี้เป็น async
+    const refreshToken = this.jwtAuthService.generateRefreshToken(user); // เช่นเดียวกัน
 
     return { accessToken, refreshToken };
   }
 
-  async login(loginDto: LoginDto): Promise<any> {
+  async login(
+    loginDto: LoginDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const { username, password } = loginDto;
     const user = await this.usersService.findByUsername(username);
     if (!user) {
@@ -52,7 +56,7 @@ export class AuthService {
     await this.usersService.deleteRefreshToken(refreshToken);
   }
 
-  async refreshToken(refreshToken: string): Promise<any> {
+  async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
     const decoded = await this.jwtAuthService.verifyRefreshToken(refreshToken);
     if (!decoded) {
       throw new Error('Invalid refresh token');

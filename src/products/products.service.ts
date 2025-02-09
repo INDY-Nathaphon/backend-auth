@@ -6,6 +6,8 @@ import { Cache } from 'cache-manager';
 import { CreateProductDto } from 'src/dto/create-product.dto';
 import { UpdateProductDto } from 'src/dto/update-product.dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import * as createCsvWriter from 'csv-writer';
+import { Response as ExpressResponse } from 'express';
 
 @Injectable()
 export class ProductsService {
@@ -56,5 +58,32 @@ export class ProductsService {
 
   async findOne(id: number): Promise<Product | null> {
     return await this.productsRepository.findOneBy({ id });
+  }
+
+  async exportToCSV(response: ExpressResponse): Promise<void> {
+    const products = await this.findAll();
+
+    // สร้าง csv writer
+    const csvWriter = createCsvWriter.createObjectCsvWriter({
+      path: 'products.csv',
+      header: [
+        { id: 'id', title: 'ID' },
+        { id: 'name', title: 'Name' },
+        { id: 'description', title: 'Description' },
+        { id: 'price', title: 'Price' },
+        { id: 'quantity', title: 'Quantity' },
+      ],
+    });
+
+    // เขียนข้อมูลสินค้าลงในไฟล์ CSV
+    await csvWriter.writeRecords(products);
+
+    // ตั้งค่าให้ Response เป็นการดาวน์โหลดไฟล์ CSV
+    response.setHeader('Content-Type', 'text/csv');
+    response.setHeader(
+      'Content-Disposition',
+      'attachment; filename=products.csv',
+    );
+    response.sendFile('products.csv', { root: './' });
   }
 }
