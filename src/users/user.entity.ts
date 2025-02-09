@@ -10,4 +10,10 @@ export class User {
 
   @Column()
   password: string;
+
+  @Column({ unique: true })
+  username: string;
+
+  @Column({ nullable: true })
+  refreshToken: string; // เก็บ Refresh Token สำหรับการทำระบบ logout
 }
