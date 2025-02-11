@@ -16,7 +16,7 @@ export class AuthService {
   async register(
     registerDto: RegisterDto,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const { username, email, password } = registerDto;
+    const { username, email, password, role } = registerDto;
     const existingUser = await this.usersService.findByUsername(username);
     if (existingUser) {
       throw new Error('User already exists');
@@ -26,10 +26,11 @@ export class AuthService {
       username,
       email,
       password: hashedPassword,
+      role: role,
     });
 
-    const accessToken = this.jwtAuthService.generateAccessToken(user); // ควรใช้ await หากฟังก์ชันนี้เป็น async
-    const refreshToken = this.jwtAuthService.generateRefreshToken(user); // เช่นเดียวกัน
+    const accessToken = this.jwtAuthService.generateAccessToken(user);
+    const refreshToken = this.jwtAuthService.generateRefreshToken(user);
 
     return { accessToken, refreshToken };
   }
@@ -61,11 +62,21 @@ export class AuthService {
     if (!decoded) {
       throw new Error('Invalid refresh token');
     }
-    const user = await this.usersService.findById(decoded.userId);
+
+    if (!isValidUserId(decoded.userId)) {
+      throw new Error('Invalid refresh token');
+    }
+
+    const user = await this.usersService.findById(Number(decoded.userId));
+
     if (!user) {
       throw new Error('User not found');
     }
     const accessToken = this.jwtAuthService.generateAccessToken(user);
     return { accessToken };
   }
+}
+
+function isValidUserId(id: any): id is number {
+  return typeof id === 'number' && !isNaN(id);
 }

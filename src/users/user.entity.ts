@@ -20,7 +20,7 @@ export class User {
   username: string;
 
   @Column({ nullable: true })
-  refreshToken: string; // เก็บ Refresh Token สำหรับการทำระบบ logout
+  refreshToken: string | null; // เก็บ Refresh Token สำหรับการทำระบบ logout
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.CUSTOMER }) // default to customer
   role: UserRole;
